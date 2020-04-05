@@ -1,6 +1,8 @@
 /* Custom bootloader linker script, edited from ST's STM32F429IITx_FLASH.ld. */
 /* Modifications are:
 /* - NOINIT memory area to hold data that survives reset. */
+/* - .user_flash sector. Trying to get placed at 0x08004000 by declaring
+/* - .padding section between .isr_vector and .user_flash.
 
 /* Entry Point */
 ENTRY(Reset_Handler)
