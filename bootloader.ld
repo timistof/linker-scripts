@@ -1,4 +1,4 @@
-/* Timetosser bootloader linker script, edited from ST's STM32F429IITx_FLASH.ld. */
+/* Custom bootloader linker script, edited from ST's STM32F429IITx_FLASH.ld. */
 /* Modifications are:
 /* - NOINIT memory area to hold data that survives reset. */
 
@@ -14,10 +14,10 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-    FLASH (rx)     : ORIGIN = 0x08000000, LENGTH = 256K
-    CCMRAM (rw)    : ORIGIN = 0x10000000, LENGTH = 64K
-    RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 191K /* deduct 1K for NOINIT data */
-    NOINIT (rwx)   : ORIGIN = 0x2002FC00, LENGTH = 1K /* NOINIT data will survive reset */
+    FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 256K /* max. bootloader binary size */
+    CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
+    RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 191K /* deduct 1K for NOINIT data */
+    NOINIT (rwx)    : ORIGIN = 0x2002FC00, LENGTH = 1K /* NOINIT data will survive reset */
 }
 
 /* Define output sections */
@@ -27,16 +27,23 @@ SECTIONS
     .isr_vector :
     {
     . = ALIGN(4);
-    KEEP(*(.isr_vector)) /* Startup code */
+    KEEP(*(.isr_vector)) /* Vector table */
     . = ALIGN(4);
     } >FLASH
 
-    /* Then comes freely flashable sector, make sure to get one of the first 4 that are 16K in size
-    .flashable_sector :
+    /* padding to align .user_flash to 0x4000 */
+    .padding :
     {
-      . = ALIGN(0x4000)
-      KEEP(*(.flashable_sector))
-      . = ALIGN(0x4000)
+        . = ALIGN(4);
+        KEEP(*(.padding))
+        . = ALIGN(4);
+    } >FLASH
+
+    /* Then comes user flash sector, make sure to get one of the first 4 that are 16K in size
+    .user_flash :
+    {
+      . = 0x08004000
+      KEEP(*(.user_flash))
     } >FLASH
 
   /* The program code and other data goes into FLASH */
